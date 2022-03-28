@@ -3,23 +3,28 @@
 using namespace std;
 using namespace ariel;
 int const EFES = 0;
-int const row_limit = 100;
+int const row_limit = 99;
 void Notebook::write(int page, int row, int column, Direction direction, string const &to_write)
 {
     this->last_row_in_use[page] = row;
-    int const row_limit = 100;
     int const low_ascii_bound = 32;
     int const high_ascii_bound = 126;
     
     if (page<EFES||row<EFES||column<EFES) {__throw_invalid_argument("Negetive args");}
 
     int str_len = to_write.size();
-    if ((str_len+column)>row_limit){__throw_invalid_argument("Out of bounds for row");}        
+    
+    if (column > row_limit) {__throw_invalid_argument("Out of bounds for row");}
+
+    if (direction == Direction::Horizontal){
+        if (str_len+column>row_limit) {__throw_invalid_argument("Out of bounds for row");}
+    }
+
     int tmpRow = row;
     int tmpColumn = column;
     for (char check_if_good: to_write) {
         if (check_if_good == '\n' || check_if_good == '~' || check_if_good < low_ascii_bound || check_if_good > high_ascii_bound) {__throw_invalid_argument("Invalid string input");}
-        if (this->notebook_data[page][row][column].cha != '_') {__throw_runtime_error( "Error in writing - space has already been written on/erased");}
+        if (this->notebook_data[page][tmpRow][tmpColumn].cha != '_') {__throw_runtime_error( "Error in writing - space has already been written on/erased");}
             if (direction == Direction::Vertical) {
                 tmpRow++;
             } else {
@@ -42,7 +47,12 @@ string Notebook::read(int page, int row, int column, Direction direction, int le
 {
     if (page<EFES||row<EFES||column<EFES||length<EFES) {__throw_invalid_argument("Negetive args");}
 
-    if (length+column>row_limit) {__throw_invalid_argument("Out of bounds for row");}
+    if (column > row_limit) {__throw_invalid_argument("Out of bounds for row");}
+
+    if (direction == Direction::Horizontal){
+        if (length+column>row_limit+1) {__throw_invalid_argument("Out of bounds for row");}
+    }
+    
 
     string ans;
     for (int i = 0; i < length; i++) {
@@ -61,7 +71,11 @@ void Notebook::erase(int page, int row, int column, Direction direction, int len
 {
     if (page<EFES||row<EFES||column<EFES||length<EFES) {__throw_invalid_argument("Negetive args");}
 
-    if (length+column>row_limit) {__throw_invalid_argument("Out of bounds for row");}
+    if (column > row_limit) {__throw_invalid_argument("Out of bounds for row");}
+
+    if (direction == Direction::Horizontal){
+        if (length+column>row_limit) {__throw_invalid_argument("Out of bounds for row");}
+    }
 
     this->last_row_in_use[page] = row;
     for (int i = 0; i < length; i++) {
